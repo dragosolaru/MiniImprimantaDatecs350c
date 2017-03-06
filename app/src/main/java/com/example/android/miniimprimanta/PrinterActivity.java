@@ -67,6 +67,12 @@ public class PrinterActivity extends Activity {
                 printImage();
             }
         });
+        findViewById(R.id.button_txt).setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                printText();
+            }
+        });
 
 
         waitForConnection();
@@ -456,6 +462,26 @@ public class PrinterActivity extends Activity {
         closePrinterServer();
     }
 
+    //Codul pentru un text
+    private void printText() {
+        Log.d(LOG_TAG, "Print text");
+
+        runTask(new PrinterRunnable() {
+            @Override
+            public void run(ProgressDialog dialog, Printer printer) throws IOException {
+                StringBuffer textBuffer = new StringBuffer();
+                textBuffer.append("Salut\n");
+                textBuffer.append(printer.getTemperature());
+                printer.reset();
+                printer.printTaggedText(textBuffer.toString());
+                printer.feedPaper(3);
+                printer.beep();
+                printer.flush();
+            }
+        }, R.string.msg_printing_text);
+    }
+
+    //Aici este codul pentru imagine
     private void printImage() {
         Log.d(LOG_TAG, "Print Image");
 
