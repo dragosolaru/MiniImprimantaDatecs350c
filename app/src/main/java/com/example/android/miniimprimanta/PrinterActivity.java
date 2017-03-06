@@ -1,31 +1,23 @@
 package com.example.android.miniimprimanta;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.datecs.api.BuildInfo;
 import com.datecs.api.emsr.EMSR;
-import com.datecs.api.emsr.EMSR.EMSRInformation;
-import com.datecs.api.emsr.EMSR.EMSRKeyInformation;
 import com.datecs.api.printer.Printer;
 import com.datecs.api.printer.Printer.ConnectionListener;
-import com.datecs.api.printer.PrinterInformation;
 import com.datecs.api.printer.ProtocolAdapter;
 import com.example.android.miniimprimanta.network.PrinterServer;
 import com.example.android.miniimprimanta.network.PrinterServerListener;
@@ -46,12 +38,6 @@ public class PrinterActivity extends Activity {
 
     // Request to get the bluetooth device
     private static final int DEFAULT_NETWORK_PORT = 9100;
-
-    // Interface, used to invoke asynchronous printer operation.
-    private interface PrinterRunnable {
-        public void run(ProgressDialog dialog, Printer printer) throws IOException;
-    }
-
     // Member variables
     private ProtocolAdapter mProtocolAdapter;
     private ProtocolAdapter.Channel mPrinterChannel;
@@ -75,17 +61,12 @@ public class PrinterActivity extends Activity {
 //                + BuildInfo.VERSION);
 
 
-
-
-
-
         findViewById(R.id.btn_print_image).setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 printImage();
             }
         });
-
 
 
         waitForConnection();
@@ -113,8 +94,6 @@ public class PrinterActivity extends Activity {
         }
     }
 
-
-
     private void toast(final String text) {
         Log.d(LOG_TAG, text);
 
@@ -133,28 +112,6 @@ public class PrinterActivity extends Activity {
             @Override
             public void run() {
                 Toast.makeText(getApplicationContext(), text, Toast.LENGTH_LONG).show();
-            }
-        });
-    }
-
-    private void dialog(final int iconResId, final String title, final String msg) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                AlertDialog.Builder builder = new AlertDialog.Builder(PrinterActivity.this);
-                builder.setIcon(iconResId);
-                builder.setTitle(title);
-                builder.setMessage(msg);
-                builder.setPositiveButton(android.R.string.ok,
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                            }
-                        });
-
-                AlertDialog dlg = builder.create();
-                dlg.show();
             }
         });
     }
@@ -499,10 +456,6 @@ public class PrinterActivity extends Activity {
         closePrinterServer();
     }
 
-
-
-
-
     private void printImage() {
         Log.d(LOG_TAG, "Print Image");
 
@@ -530,6 +483,10 @@ public class PrinterActivity extends Activity {
     }
 
 
+    // Interface, used to invoke asynchronous printer operation.
+    private interface PrinterRunnable {
+        void run(ProgressDialog dialog, Printer printer) throws IOException;
+    }
 
 
 }
