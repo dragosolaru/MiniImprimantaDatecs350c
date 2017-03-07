@@ -6,7 +6,6 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
-import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -67,12 +66,12 @@ public class PrinterActivity extends Activity {
                 printImage();
             }
         });
-        findViewById(R.id.button_txt).setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                printText();
-            }
-        });
+//        findViewById(R.id.button_txt).setOnClickListener(new OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                printText();
+//            }
+//        });
 
 
         waitForConnection();
@@ -122,20 +121,6 @@ public class PrinterActivity extends Activity {
         });
     }
 
-    private void status(final String text) {
-       /* runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (text != null) {
-                    findViewById(R.id.linearLayout).setVisibility(View.VISIBLE);
-                    ((TextView) findViewById(R.id.txt_status)).setText(text);
-                } else {
-                    findViewById(R.id.panel_status).setVisibility(View.INVISIBLE);
-                }
-            }
-        });*/
-    }
-
     private void runTask(final PrinterRunnable r, final int msgResId) {
         final ProgressDialog dialog = new ProgressDialog(PrinterActivity.this);
         dialog.setTitle(getString(R.string.title_please_wait));
@@ -183,32 +168,22 @@ public class PrinterActivity extends Activity {
             mProtocolAdapter.setPrinterListener(new ProtocolAdapter.PrinterListener() {
                 @Override
                 public void onThermalHeadStateChanged(boolean overheated) {
-                    if (overheated) {
+                    if (overheated)
                         Log.d(LOG_TAG, "Thermal head is overheated");
-                        status("OVERHEATED");
-                    } else {
-                        status(null);
-                    }
+
                 }
 
                 @Override
                 public void onPaperStateChanged(boolean hasPaper) {
-                    if (hasPaper) {
+                    if (hasPaper)
                         Log.d(LOG_TAG, "Event: Paper out");
-                        status("PAPER OUT");
-                    } else {
-                        status(null);
-                    }
+
                 }
 
                 @Override
                 public void onBatteryStateChanged(boolean lowBattery) {
-                    if (lowBattery) {
+                    if (lowBattery)
                         Log.d(LOG_TAG, "Low battery");
-                        status("LOW BATTERY");
-                    } else {
-                        status(null);
-                    }
                 }
             });
 
@@ -238,7 +213,7 @@ public class PrinterActivity extends Activity {
     }
 
     private synchronized void waitForConnection() {
-        status(null);
+        Log.d(LOG_TAG, "With what will sync?");
 
         closeActiveConnection();
 
@@ -463,23 +438,23 @@ public class PrinterActivity extends Activity {
     }
 
     //Codul pentru un text
-    private void printText() {
-        Log.d(LOG_TAG, "Print text");
-
-        runTask(new PrinterRunnable() {
-            @Override
-            public void run(ProgressDialog dialog, Printer printer) throws IOException {
-                StringBuffer textBuffer = new StringBuffer();
-                textBuffer.append("Salut\n");
-                textBuffer.append(printer.getTemperature());
-                printer.reset();
-                printer.printTaggedText(textBuffer.toString());
-                printer.feedPaper(3);
-                printer.beep();
-                printer.flush();
-            }
-        }, R.string.msg_printing_text);
-    }
+//    private void printText() {
+//        Log.d(LOG_TAG, "Print text");
+//
+//        runTask(new PrinterRunnable() {
+//            @Override
+//            public void run(ProgressDialog dialog, Printer printer) throws IOException {
+//                StringBuffer textBuffer = new StringBuffer();
+//                textBuffer.append("Salut\n");
+//                textBuffer.append(printer.getTemperature());
+//                printer.reset();
+//                printer.printTaggedText(textBuffer.toString());
+//                printer.feedPaper(3);
+//                printer.beep();
+//                printer.flush();
+//            }
+//        }, R.string.msg_printing_text);
+//    }
 
     //Aici este codul pentru imagine
     private void printImage() {
@@ -491,23 +466,35 @@ public class PrinterActivity extends Activity {
                 final BitmapFactory.Options options = new BitmapFactory.Options();
                 options.inScaled = false;
 
-                final AssetManager assetManager = getApplicationContext().getAssets();
-                final Bitmap bitmap = BitmapFactory.decodeStream(assetManager.open("LogoBistrivet2.png"),
-                        null, options);
+                //    final AssetManager assetManager = getApplicationContext().getAssets();
+
+                final Bitmap bitmap = BitmapFactory.decodeFile("///storage/emulated/0/STAMPILUTA.jpg",
+                        options);
+
                 final int width = bitmap.getWidth();
                 final int height = bitmap.getHeight();
                 final int[] argb = new int[width * height];
+
                 bitmap.getPixels(argb, 0, width, 0, 0, width, height);
                 bitmap.recycle();
-
                 printer.reset();
                 printer.printCompressedImage(argb, width, height, Printer.ALIGN_CENTER, true);
-                printer.feedPaper(110);
+                printer.feedPaper(100);
                 printer.flush();
             }
         }, R.string.msg_printing_image);
     }
-
+//    public static Bitmap getBitmapFromFile(String path) {
+//        // bimatp factory
+//        BitmapFactory.Options options = new BitmapFactory.Options();
+//        // downsizing image as it throws OutOfMemory Exception for larger
+//        // images
+//        options.inSampleSize = 3;
+//
+//        final Bitmap bitmap = BitmapFactory.decodeFile(path,
+//                options);
+//        return bitmap;
+//    }
 
     // Interface, used to invoke asynchronous printer operation.
     private interface PrinterRunnable {
